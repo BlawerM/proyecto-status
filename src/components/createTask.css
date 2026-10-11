@@ -1,0 +1,8 @@
+li {
+  cursor: pointer;
+}
+
+.cumplida {
+  text-decoration: line-through;
+  color: #888888;
+}
