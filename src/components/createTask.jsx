@@ -1,8 +1,26 @@
-import './createTask.css'
+import './CreateTask.css'
+import { useState} from 'react';
 
-function createTask({createTask, setCreateTask}) {
+function CreateTask({onCreateTask}) {
+    const [newTask, setNewTask] = useState('');
 
-    return <li>
-        
-    </li>
+    const addTask = () => {
+        if (newTask.trim() !== '') {
+            onCreateTask(newTask.trim());
+            setNewTask('');
+        }
+    }
+
+    return (
+        <div>
+            <input type="text" name="text" id="text" value={newTask}
+            onChange={(e) => setNewTask(e.target.value)}
+            placeholder='Escriba la nueva tarea'
+            />
+
+            <button onClick={addTask}>Agregar</button>
+        </div>
+    )
 }
+
+export default CreateTask;
