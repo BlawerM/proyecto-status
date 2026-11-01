@@ -56,7 +56,7 @@ export default function EditTask({ items, loading, onUpdate}) {
                     value={title}
                     error={titleError}
                     helperText={titleError ? 'Title is required' : ' '}
-                    onChange{(e) => {
+                    onChange={(e) => {
                         setTitle(e.target.value)
                         setTitleError(false)
                     }}
