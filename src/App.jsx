@@ -12,8 +12,9 @@ import CreateTask from "./pages/tasks/Create";
 import EditTask from "./pages/tasks/Edit";
 
 export default function App() {
-    // El estado vive aquí, en el componente que no se desmonta al navegar.
-    const tasks = useCrud("/data/tasks.json");
+    // Conectado directamente al endpoint de Express mediante el proxy de Vite
+    const tasks = useCrud("/tasks");
+
     return (
         <Routes>
             <Route element={<Layout />}>

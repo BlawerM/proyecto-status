@@ -1,21 +1,41 @@
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Table,TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 
-export default function TaskList({items, loading, error, onDelete}) {
-    const [taskToDelete, setTaskToDelete] = useState(null)
+const STATUS_CHIP_PROPS = {
+    "in process": { label: "In Process", color: "warning" },
+    "complete": { label: "Complete", color: "success" },
+    "incomplete": { label: "Incomplete", color: "error" },
+};
 
-    if (loading) return <CircularProgress/>
+export default function TaskList({ items, loading, error, onDelete }) {
+    const [taskToDelete, setTaskToDelete] = useState(null);
+    const [deleting, setDeleting] = useState(false);
+
+    if (loading) return <CircularProgress />;
     if (error) {
-        return <Alert severity="error">Tasks could not be loaded: {error}</Alert>
+        return <Alert severity="error">Tasks could not be loaded: {error}</Alert>;
+    }
+
+    async function handleConfirmDelete() {
+        if (!taskToDelete) return;
+        try {
+            setDeleting(true);
+            await onDelete(String(taskToDelete.id || taskToDelete._id));
+            setTaskToDelete(null);
+        } catch {
+            setTaskToDelete(null);
+        } finally {
+            setDeleting(false);
+        }
     }
 
     return (
         <Box>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2}}>
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
                 <Typography variant="h4">Tasks</Typography>
                 <Button variant="contained" component={RouterLink} to="/tasks/create">
-                New Task
+                    New Task
                 </Button>
             </Box>
 
@@ -26,55 +46,81 @@ export default function TaskList({items, loading, error, onDelete}) {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Task</TableCell>
-                                <TableCell>Description</TableCell>
-                                <TableCell align="right">Actions</TableCell>
+                                <TableCell>Tareas</TableCell>
+                                <TableCell>Descripción</TableCell>
+                                <TableCell>Incentivo</TableCell>
+                                <TableCell>Stado</TableCell>
+                                <TableCell align="right">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {items.map((task) => (
-                                <TableRow key={task.id}>
-                                    <TableCell>{task.title}</TableCell>
-                                    <TableCell>{task.description}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            size="small"
-                                            component={RouterLink}
-                                            to={`/tasks/edit/${task.id}`}>
-                                            Edit
-                                        </Button>
-                                        <Button
-                                            size="small"
-                                            color="error"
-                                            onClick={() => setTaskToDelete(task)}>
+                            {items.map((task) => {
+                                const taskId = task.id || task._id;
+                                const statusConfig = STATUS_CHIP_PROPS[task.status] || {
+                                    label: task.status,
+                                    color: "default",
+                                };
+
+                                return (
+                                    <TableRow key={taskId}>
+                                        <TableCell>{task.title}</TableCell>
+                                        <TableCell>{task.desc}</TableCell>
+                                        <TableCell>{task.incentive}</TableCell>
+                                        <TableCell>
+                                            <Chip
+                                                size="small"
+                                                label={statusConfig.label}
+                                                color={statusConfig.color}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="right">
+                                            <Button
+                                                size="small"
+                                                component={RouterLink}
+                                                to={`/tasks/edit/${taskId}`}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                color="error"
+                                                onClick={() => setTaskToDelete(task)}
+                                            >
                                                 Delete
                                             </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </TableContainer>
             )}
 
-        <Dialog open={Boolean(taskToDelete)} onClose={() => setTaskToDelete(null)}>
-            <DialogTitle>Deletear tarea?</DialogTitle>
-            <DialogContent>
-                <DialogContentText>Vas a deletear "{taskToDelete?.title}". Esta acción no puede ser undone</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => setTaskToDelete(null)}>Cancel</Button>
-                <Button
-                    color="error"
-                    variant="contained"
-                    onClick={() => {
-                        onDelete(taskToDelete.id)
-                        setTaskToDelete(null)
-                    }}>
-                    Deletear
-                </Button>
-            </DialogActions>
-        </Dialog>
+            <Dialog
+                open={Boolean(taskToDelete)}
+                onClose={() => !deleting && setTaskToDelete(null)}
+            >
+                <DialogTitle>¿Eliminar tarea?</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Vas a eliminar "{taskToDelete?.title}". Esta acción no se puede deshacer.
+                    </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setTaskToDelete(null)} disabled={deleting}>
+                        Cancel
+                    </Button>
+                    <Button
+                        color="error"
+                        variant="contained"
+                        disabled={deleting}
+                        onClick={handleConfirmDelete}
+                    >
+                        {deleting ? "Deleting..." : "Delete"}
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
-    )
+    );
 }
