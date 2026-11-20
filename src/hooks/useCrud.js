@@ -15,35 +15,89 @@ export function useCrud(url) {
                 setLoading(true);
                 setError(null);
 
-                const res = await fetch(url, {signal: control.signal})
-                if (!res.ok) throw new Error(`^could not load ${url} (${res.status})`)
+                const res = await fetch(url, { signal: control.signal});
                 const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || `Error al cargar ${url} (${res.status})`)
                 
-                setItems(data.map((item, index) => ({...item, id: Number(item.id ?? index +1)})))
+                const lista = Array.isArray(data) ? data : (data.datos || []);
+
+                setItems(lista.map((item) => ({
+                    ...item, id: item._id || item.id
+                })))
+
             } catch (e) {
-                if (e.name !== 'AbortError') setError(e.message)
-            } finally {
-                if (!control.signal.aborted) setLoading(false)
+                if (e.name !== 'AbortError') setError(e.message);
+            }finally{
+                if (!control.signal.aborted) setLoading(false);
             }
         }
-
         load();
-        return () => control.abort()
+        return () => control.abort();
+    }, [url])
 
-    },[url])
+    //POST de tasks
+    const create = async (newItem) => {
+        try {
+            setError(null);
+            const res =await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json'},
+                body: JSON.stringify(newItem),
+            });
+            const data = await res.json();
 
-    //Crear las 3 operaciones que estarán cargadas en todo momento en memoria
-    const create = (newItem) =>{
-        const id = items.length ? Math.max(...items.map((i) => i.id)) + 1 : 1
-        setItems(...items, {...newItem, id})
-        return id;
-    }
+            if(!res.ok) throw new Error(data.error || 'Error al crear la tarea');
 
-    const update = (id, data) => {
-        setItems(items.map((item) => (item.id === id ? {...item, ...data} : item)))
-    }
+            const creado = { ...data, id: data._id || data.id};
+            setItems((prev) => [...prev, creado]);
+            return creado.id;
+        } catch (e) {
+            setError(e.message);
+            throw e;
+        }
+    };
 
-    const remove = (id) => setItems(items.filter((item) => item.id !== id))
+    const update = async (id, dataToUpdate) => {
+        try {
+            setError(null);
+            const baseUrl = url.split('?')[0];
+            const res = await fetch(`${baseUrl}/${id}`,{
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(dataToUpdate),
+            });
+            const data = await res.json();
 
-    return {items, create, update, remove, loading, error}
+            if (!res.ok) throw new Error (data.error || 'Error al actualizar la tarea');
+
+            const actualizado = {...data, id: data._id || data.id};
+            setItems((prev) => prev.map((item) => (item.id === id ? actualizado : item))
+            );
+            return actualizado;
+        } catch (e) {
+            setError(e.message);
+            throw e;
+        }
+    };
+
+    const remove = async (id) => {
+        try {
+            setError(null);
+            const baseUrl = url.split('?')[0];
+            const res = await fetch(`${baseUrl}/${id}`, {
+                method: 'DELETE',
+            });
+            const data = await res.json();
+
+            if(!res.ok) throw new Error(data.error || 'Error al eliminar la tarea');
+
+            setItems((prev) => prev.filter((item) => item.id !== id));
+        }catch (e) {
+            setError(e.message);
+            throw e;
+        }
+    };
+
+    return { items, create, update, remove, loading, error};
 }
