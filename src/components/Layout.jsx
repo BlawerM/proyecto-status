@@ -16,9 +16,9 @@ export default function Layout() {
                         Tasks
                     </Typography>
 
-                    <Button component={NavLink} to="/" end sx={linkSx}>Home</Button>
-                    <Button component={NavLink} to="/about" end sx={linkSx}>About</Button>
-                    <Button component={NavLink} to="/tasks" end sx={linkSx}>Tasks</Button>
+                    <Button component={NavLink} to="/" end sx={linkSx}>Principal</Button>
+                    <Button component={NavLink} to="/about" end sx={linkSx}>Nosotros</Button>
+                    <Button component={NavLink} to="/tasks" end sx={linkSx}>Tareas</Button>
 
                 </Toolbar>
             </AppBar>

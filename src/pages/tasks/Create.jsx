@@ -56,15 +56,15 @@ export default function CreateTask({onCreate}){
 
     return (
         <Paper sx={{p: 3, maxWidth: 560}}>
-            <Typography variant='h5' sx={{ mb: 3}}>New Task</Typography>
+            <Typography variant='h5' sx={{ mb: 3}}>Nueva Tarea</Typography>
 
             <Stack spacing={2}>
                 {apiError && <Alert severity='error'>{apiError}</Alert>}
 
                 <TextField
-                    label="title"
+                    label="Título"
                     value={title}
-                    minRows={errors.title}
+                    error={errors.title}
                     helperText={errors.title ? 'Se requiere el título': ' '}
                     onChange={(e) => {
                         setTitle(e.target.value);
@@ -72,7 +72,7 @@ export default function CreateTask({onCreate}){
                 }}/>
 
                 <TextField
-                    label="description"
+                    label="Descripción"
                     value={desc}
                     multiline
                     minRows={3}
@@ -84,7 +84,7 @@ export default function CreateTask({onCreate}){
                     }}/>
                 
                 <TextField
-                    label="Incentive"
+                    label="Incentivo"
                     type="number"
                     value={incentive}
                     inputProps={{min: 1}}
@@ -97,7 +97,7 @@ export default function CreateTask({onCreate}){
 
                 <TextField
                     select
-                    label="status"
+                    label="Estado"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}>
                         {STATUS_OPTIONS.map((opt) => (
@@ -109,10 +109,10 @@ export default function CreateTask({onCreate}){
 
                 <Stack direction="row" spacing={1}>
                     <Button variant="contained" onClick={save} disabled={saving}>
-                        {saving ? 'Saving...' : 'Save'}
+                        {saving ? 'Saving...' : 'Guardar'}
                     </Button>
                     <Button onClick={() => navigate('/tasks')} disabled={saving}>
-                        Cancel
+                        Cancelar
                     </Button>
                 </Stack>
             </Stack>

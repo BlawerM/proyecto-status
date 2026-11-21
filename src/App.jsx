@@ -49,6 +49,19 @@ export default function App() {
                     />
                 </Route>
 
+                <Route
+                    index
+                    element={
+                        <TasksList
+                            items={tasks.items}
+                            loading={tasks.loading}
+                            error={tasks.error}
+                            onUpdate={tasks.update}
+                            onDelete={tasks.remove}
+                        />
+                    }
+                />
+
                 <Route path="*" element={<NotFound />} />
             </Route>
         </Routes>

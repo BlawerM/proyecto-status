@@ -1,20 +1,47 @@
 import { useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
+import { Alert, Box, Button, Checkbox, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
 
 const STATUS_CHIP_PROPS = {
-    "in process": { label: "In Process", color: "warning" },
-    "complete": { label: "Complete", color: "success" },
-    "incomplete": { label: "Incomplete", color: "error" },
+    "in process": {
+        label: "En progreso",
+        bgcolor: "#D4AF37",
+        textColor: "#121212", // Texto oscuro para alto contraste sobre dorado
+    },
+    "complete": {
+        label: "Completada",
+        bgcolor: "#0B3B24",
+        textColor: "#FFFFFF", // Texto blanco sobre verde oscuro
+    },
+    "incomplete": {
+        label: "Incompleta",
+        bgcolor: "#58111A",
+        textColor: "#FFFFFF", // Texto blanco sobre vinotinto
+    },
 };
 
-export default function TaskList({ items, loading, error, onDelete }) {
+export default function TaskList({ items, loading, error, onUpdate, onDelete }) {
     const [taskToDelete, setTaskToDelete] = useState(null);
     const [deleting, setDeleting] = useState(false);
+    const [updatingId, setUpdatingId] = useState(null);
 
     if (loading) return <CircularProgress />;
     if (error) {
-        return <Alert severity="error">Tasks could not be loaded: {error}</Alert>;
+        return <Alert severity="error">Las tareas no pudieron cargarse: {error}</Alert>;
+    }
+
+    async function handleToggleStatus(task) {
+        const taskId = String(task.id || task._id);
+        const nextStatus = task.status === "complete" ? "in process" : "complete";
+
+        try {
+            setUpdatingId(taskId);
+            await onUpdate(taskId, { status: nextStatus });
+        } catch {
+            // El error se captura en `error` de useCrud
+        } finally {
+            setUpdatingId(null);
+        }
     }
 
     async function handleConfirmDelete() {
@@ -33,9 +60,23 @@ export default function TaskList({ items, loading, error, onDelete }) {
     return (
         <Box>
             <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 2 }}>
-                <Typography variant="h4">Tasks</Typography>
+                <Typography
+                    variant="h4"
+                    color="primary"
+                    sx={{
+                        border: "1px solid",
+                        borderColor: "primary.main",
+                        borderRadius: 1,
+                        px: 2,
+                        py: 0.5,
+                        display: "inline-block",
+                    }}
+                >
+                    Tareas
+                </Typography>
+
                 <Button variant="contained" component={RouterLink} to="/tasks/create">
-                    New Task
+                    Nueva Tarea
                 </Button>
             </Box>
 
@@ -46,33 +87,62 @@ export default function TaskList({ items, loading, error, onDelete }) {
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell padding="checkbox"></TableCell>
                                 <TableCell>Tareas</TableCell>
                                 <TableCell>Descripción</TableCell>
                                 <TableCell>Incentivo</TableCell>
-                                <TableCell>Stado</TableCell>
+                                <TableCell>Estado</TableCell>
                                 <TableCell align="right">Acciones</TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {items.map((task) => {
-                                const taskId = task.id || task._id;
+                                const taskId = String(task.id || task._id);
+                                const isCompleted = task.status === "complete";
+                                const isUpdating = updatingId === taskId;
+
+                                // 2. Aquí obtienes el label y los colores personalizados para el estado de esta tarea
                                 const statusConfig = STATUS_CHIP_PROPS[task.status] || {
                                     label: task.status,
-                                    color: "default",
+                                    bgcolor: "#424242",
+                                    textColor: "#FFFFFF",
                                 };
 
                                 return (
                                     <TableRow key={taskId}>
-                                        <TableCell>{task.title}</TableCell>
+                                        <TableCell padding="checkbox">
+                                            <Checkbox
+                                                checked={isCompleted}
+                                                disabled={isUpdating}
+                                                color="success"
+                                                onChange={() => handleToggleStatus(task)}
+                                                inputProps={{ "aria-label": `Mark ${task.title} as complete` }}
+                                            />
+                                        </TableCell>
+                                        <TableCell
+                                            sx={{
+                                                textDecoration: isCompleted ? "line-through" : "none",
+                                                color: isCompleted ? "text.secondary" : "text.primary",
+                                            }}
+                                        >
+                                            {task.title}
+                                        </TableCell>
                                         <TableCell>{task.desc}</TableCell>
                                         <TableCell>{task.incentive}</TableCell>
+
+                                        {/* 3. Aquí aplicas statusConfig en el Chip */}
                                         <TableCell>
                                             <Chip
                                                 size="small"
                                                 label={statusConfig.label}
-                                                color={statusConfig.color}
+                                                sx={{
+                                                    bgcolor: statusConfig.bgcolor,
+                                                    color: statusConfig.textColor,
+                                                    fontWeight: 600,
+                                                }}
                                             />
                                         </TableCell>
+
                                         <TableCell align="right">
                                             <Button
                                                 size="small"
@@ -109,7 +179,7 @@ export default function TaskList({ items, loading, error, onDelete }) {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setTaskToDelete(null)} disabled={deleting}>
-                        Cancel
+                        Cancelar
                     </Button>
                     <Button
                         color="error"
@@ -117,7 +187,7 @@ export default function TaskList({ items, loading, error, onDelete }) {
                         disabled={deleting}
                         onClick={handleConfirmDelete}
                     >
-                        {deleting ? "Deleting..." : "Delete"}
+                        {deleting ? "Deleting..." : "Borrar"}
                     </Button>
                 </DialogActions>
             </Dialog>

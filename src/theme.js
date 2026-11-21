@@ -5,7 +5,7 @@ const theme = createTheme({
   palette: {
     primary: { main: '#D4AF37' },
     secondary: { main: '#0B3B24' },
-    teriary: {main: '#58111A'},
+    tertiary: {main: '#58111A'},
     background: { default: '#121212' },
   },
   shape: { borderRadius: 8 },

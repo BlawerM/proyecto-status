@@ -14,7 +14,7 @@ export default function Home() {
                  Texto de referencia a task porque tasks: WIP <HandymanIcon></HandymanIcon>
             </Typography>
 
-            <Button variant="contained" component={RouterLink} to="/tasks">View Tasks</Button>
+            <Button variant="contained" component={RouterLink} to="/tasks">Ver Tareas </Button>
         </Paper>
     )
 }

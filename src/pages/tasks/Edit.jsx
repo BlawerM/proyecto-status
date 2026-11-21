@@ -89,15 +89,13 @@ function EditTaskForm({ task, onUpdate }) {
 
     return (
         <Paper sx={{ p: 3, maxWidth: 560 }}>
-            <Typography variant="h5" sx={{ mb: 3 }}>
-                Edit Task
-            </Typography>
+            <Typography variant="h5" sx={{ mb: 3 }}> Editar Tarea </Typography>
 
             <Stack spacing={2}>
                 {apiError && <Alert severity="error">{apiError}</Alert>}
 
                 <TextField
-                    label="Title"
+                    label="Título"
                     value={title}
                     error={errors.title}
                     helperText={errors.title ? "El título es requerido" : " "}
@@ -108,7 +106,7 @@ function EditTaskForm({ task, onUpdate }) {
                 />
 
                 <TextField
-                    label="Description"
+                    label="Descripción"
                     value={desc}
                     multiline
                     minRows={3}
@@ -121,7 +119,7 @@ function EditTaskForm({ task, onUpdate }) {
                 />
 
                 <TextField
-                    label="Incentive"
+                    label="Incentivo"
                     type="number"
                     value={incentive}
                     inputProps={{ min: 1 }}
@@ -135,7 +133,7 @@ function EditTaskForm({ task, onUpdate }) {
 
                 <TextField
                     select
-                    label="Status"
+                    label="Estado"
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
                 >
@@ -148,10 +146,10 @@ function EditTaskForm({ task, onUpdate }) {
 
                 <Stack direction="row" spacing={1}>
                     <Button variant="contained" onClick={save} disabled={saving}>
-                        {saving ? "Saving..." : "Save Changes"}
+                        {saving ? "Saving..." : "Guardar cambios"}
                     </Button>
                     <Button onClick={() => navigate("/tasks")} disabled={saving}>
-                        Cancel
+                        Cancelar
                     </Button>
                 </Stack>
             </Stack>
