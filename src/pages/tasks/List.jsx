@@ -149,14 +149,14 @@ export default function TaskList({ items, loading, error, onUpdate, onDelete }) 
                                                 component={RouterLink}
                                                 to={`/tasks/edit/${taskId}`}
                                             >
-                                                Edit
+                                                Editar
                                             </Button>
                                             <Button
                                                 size="small"
                                                 color="error"
                                                 onClick={() => setTaskToDelete(task)}
                                             >
-                                                Delete
+                                                Borrar
                                             </Button>
                                         </TableCell>
                                     </TableRow>
